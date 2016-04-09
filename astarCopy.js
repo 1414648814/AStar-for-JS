@@ -322,7 +322,7 @@ BinaryHeap.prototype = {
 	    this.sinkDown(this.content.length - 1);
   	},
 
-  	// 返回数组中最后的结点
+  	// 返回数组中开始的结点
   	pop: function() {
 	    // Store the first element so we can return it later.\   存储
 	    var result = this.content[0];
