@@ -47,8 +47,6 @@ GridNode.prototype.isWall = function() {
 
 // 数据结构（2叉堆）
 var BinaryHeap = {
-	Push : function() {
-BinaryHeap.prototype = {
 
 	// 加入到数组的后面，也就是树的叶节点
 	Push : function(element) {
