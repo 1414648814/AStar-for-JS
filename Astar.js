@@ -145,7 +145,6 @@ var BinaryHeap = {
 	},
 
 	// 下移
-<<<<<<< HEAD
 	SinkDown : function(n){
 		var element = this.content[n];
 		while(n > 0) {
@@ -164,7 +163,7 @@ var BinaryHeap = {
 			}
 		}
 	}
-=======
+
 	HeapDown : function(){
 
 	},
@@ -172,7 +171,6 @@ var BinaryHeap = {
 	rescoreElement : function(){
 
 	},
->>>>>>> origin/master
  
 };
 
