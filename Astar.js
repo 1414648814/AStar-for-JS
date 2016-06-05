@@ -1,43 +1,52 @@
 // A星对象
-var AStar {
+var AStar = {
 	// 搜索函数
-	SearchPath : function (Grid, start, end) {
+	SearchPath : function(graph, start, end, options) {
 
 	},
 
-	//
+	// 启发式搜索
+	heuristics : function() {
 
-
-
-
-
-
-}；
-
-// 方格
-var Grid {
-	getPosX : function() {
-		return this._PosX;
 	},
 
-	setPosX : function(posX) {
-		this._PosX = posX;
+	//重置结点
+	cleanNode : function() {
+
 	},
 
-	getPosY : function() {
-		return this._PosY;
-	},
-
-	setPosY : function(posY) {
-		this._PosY = posY;
-	},
-
-	_PosX : null,
-	_PosY : null
 };
 
+//一个内存结构
+function Graph(gridIn,options){
+
+}
+
+// 方格
+function GridNode(x,y,weight){
+	this.x = x;
+	this.y = y;
+	this.weight = weight;
+}
+
+GridNode.prototype.toString = function() {
+	return "[" + this.x + " " + this.y + "]";
+
+};
+
+//获取到从邻居结点到自己的权重
+GridNode.prototype.getCost = function(fromNeighbor) {
+
+}
+
+//返回该结点是否可以到达
+GridNode.prototype.isWall = function() {
+
+}
+
+
 // 数据结构（2叉堆）
-BinaryHeap.prototype = {
+var BinaryHeap = {
 
 	// 加入到数组的后面，也就是树的叶节点
 	Push : function(element) {
@@ -136,6 +145,7 @@ BinaryHeap.prototype = {
 	},
 
 	// 下移
+<<<<<<< HEAD
 	SinkDown : function(n){
 		var element = this.content[n];
 		while(n > 0) {
@@ -154,11 +164,20 @@ BinaryHeap.prototype = {
 			}
 		}
 	}
+=======
+	HeapDown : function(){
+
+	},
+
+	rescoreElement : function(){
+
+	},
+>>>>>>> origin/master
  
-}；
+};
 
 // 游戏控制器
-var Controller {
+var GameController = {
 	pathTo : function(grid) {
 
 	}
