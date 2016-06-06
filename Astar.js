@@ -5,9 +5,35 @@ var AStar = {
 
 	},
 
-	// 启发式搜索
-	heuristics : function() {
+	/*
+		几种估价函数，包括曼哈顿估价，几何估价，对角线估价
+	 */
+	//曼哈顿
+	manhattan : function(pos0,pos1) {
+		var distance1 = Math.abs(pos1.x - pos0.x);
+		var distance2 = Math.abs(pos1.y - pos0.x);
+		return distance1 + distance2;
+	},
 
+	//几何
+	euclidian : function(pos0,pos1) {
+		var straightCost = 1;
+		var distance1 = Math.abs(pos1.x - pos0.x);
+		var distance2 = Math.abs(pos1.y - pos0.x);
+		return Math.sqrt(distance1 * distance1 + distance2 * distance2) * straightCost;
+
+	},
+
+	//斜线距离（综合了曼哈顿和几何）
+	diagonal : function (pos0,pos1) {
+		var distance1 = Math.abs(pos1.x - pos0.x);
+		var distance2 = Math.abs(pos1.y - pos0.x);
+		var straight = distance1 + distance2;
+		var diag = Math.min(distance1,distance2);
+		var straightCost = 1;
+		var diagCost = Math.sqrt(2);
+
+		return diagCost * diag + straightCost * (straight - 2 * diag);
 	},
 
 	//重置结点
@@ -44,8 +70,7 @@ GridNode.prototype.isWall = function() {
 
 }
 
-
-// 数据结构（2叉堆）
+// 数据结构（最小堆）
 var BinaryHeap = {
 
 	// 加入到数组的后面，也就是树的叶节点
@@ -162,14 +187,6 @@ var BinaryHeap = {
 				break;
 			}
 		}
-	}
-
-	HeapDown : function(){
-
-	},
-
-	rescoreElement : function(){
-
 	},
  
 };

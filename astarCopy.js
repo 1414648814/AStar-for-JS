@@ -146,11 +146,13 @@ var astar {
   	// See list of heuristics: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
   	//启发式搜索
   	heuristics: {
+  		// 曼哈顿距离
 	    manhattan: function(pos0, pos1) {
 	      var d1 = Math.abs(pos1.x - pos0.x);
 	      var d2 = Math.abs(pos1.y - pos0.y);
 	      return d1 + d2;
 	    },
+	    // 斜线距离
 	    diagonal: function(pos0, pos1) {
 	      var D = 1;
 	      var D2 = Math.sqrt(2);
