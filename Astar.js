@@ -1,8 +1,83 @@
 // A星对象
 var AStar = {
 	// 搜索函数
-	SearchPath : function(graph, start, end, options) {
+	SearchPath : function(Graph, start, end, options) {
+		Graph.cleanDirty();
 
+		options = options || {};
+		var heuristic = AStar.manhattan;
+		var closest = options.closest || false;
+
+		var openHeap = GameController.getHeap();
+		var closetNode = start;
+		start.h = manhattan(start,end);
+
+		//标记开始节点
+		Graph.markDirty(start);
+
+		openHeap.push(start);
+
+		while(openHeap.size() > 0){
+			//取出尾节点
+			var currentNode = openHeap.pop();
+
+			//找到结果
+			if(currentNode === end)
+				return GameController.pathTo(currentNode);
+
+			//移动节点从开列表到闭列表
+			currentNode.closed = true;
+
+			//找出所有邻居节点
+			var neighbors = Graph.neighbors(currentNode);
+
+			for(var i = 0;i < neighbors.length;++i){
+				var neighbor = neighbors[i];
+
+				//闭列表中的和不可到达则不访问
+				if(neighbor.closed || neighbor.isWall()){
+					continue;
+				}
+
+				//计算g值
+				var gScore = currentNode.g + neighbor.getCost(currentNode);
+				var beenVisited = neighbor.visited;
+
+				//如果邻居节点没有访问过或者节点到达邻居节点的路径长度更短
+				if(!beenVisited || gScore < neighbor.g){
+					neighbor.visited = true;
+					neighbor.parent = currentNode;
+
+					//重新计算h,g值
+					neighbor.h = neighbor.h || manhattan(neighbor,end);
+					neighbor.g = gScore;
+					neighbor.f = neighbor.g + neighbor.h;
+
+					Graph.markDirty(neighbor);
+
+					if(closest){
+						if (neighbor.h  < closetNode.h || (neighbor.h === closetNode.h && neighbor.g < closetNode.g)) {
+							closetNode = neighbor;
+						}
+					}
+
+					if(!beenVisited){
+						openHeap.push(neighbor);
+					}
+					else{
+						openHeap.RescoreElement(neighbor);
+					}
+				}
+
+			}
+
+		}
+		//找到靠近目标节点
+		if(closest) {
+			return GameController.pathTo(closetNode);
+		}
+
+		return [];
 	},
 
 	/*
@@ -37,7 +112,13 @@ var AStar = {
 	},
 
 	//重置结点
-	cleanNode : function() {
+	cleanNode : function(node) {
+		node.f = 0;
+		node.g = 0;
+		node.h = 0;
+		node.visited = false;
+		node.closed = false;
+		node.parent = null;
 
 	},
 
@@ -45,15 +126,118 @@ var AStar = {
 
 //一个内存结构
 function Graph(gridIn,options){
+	options = options || {};
+	this.nodes = [];
+	this.diagonal = !!options.diagonal;
+	this.grid = [];
 
-}
+	for(var x = 0;x < gridIn.length;x++){
+		this.grid[x] = [];
+
+		for(var y = 0,row = gridIn[x];y < row.length;y++){
+			var node = new GridNode(x,y,row[y]);
+			this.grid[x][y] = node;
+			this.nodes.push(node);
+		}
+	}
+	this.init();
+
+};
+
+//初始化
+Graph.prototype.init = function(){
+	this.dirtyNodes = [];
+	for(var i = 0;i < this.nodes.length;i++){
+		AStar.cleanNode();
+	}
+
+};
+
+//清除节点
+Graph.prototype.cleanDirty = function(){
+	for(var i = 0;i < this.dirtyNodes.length;i++){
+		AStar.cleanNode(this.dirtyNodes[i]);
+	}
+	this.dirtyNodes = [];
+};
+
+//标记节点
+Graph.prototype.markDirty = function (node) {
+	this.dirtyNodes.push(node);
+};
+
+// 获取到结点的所有邻居结点
+Graph.prototype.neighbors = function(node) {
+	var ret = [];
+	var x = node.x;
+	var y = node.y;
+	var grid = this.grid;
+
+	// West
+	if (grid[x - 1] && grid[x - 1][y]) {
+		ret.push(grid[x - 1][y]);
+	}
+
+	// East
+	if (grid[x + 1] && grid[x + 1][y]) {
+		ret.push(grid[x + 1][y]);
+	}
+
+	// South
+	if (grid[x] && grid[x][y - 1]) {
+		ret.push(grid[x][y - 1]);
+	}
+
+	// North
+	if (grid[x] && grid[x][y + 1]) {
+		ret.push(grid[x][y + 1]);
+	}
+
+	if (this.diagonal) {
+		// Southwest
+		if (grid[x - 1] && grid[x - 1][y - 1]) {
+			ret.push(grid[x - 1][y - 1]);
+		}
+
+		// Southeast
+		if (grid[x + 1] && grid[x + 1][y - 1]) {
+			ret.push(grid[x + 1][y - 1]);
+		}
+
+		// Northwest
+		if (grid[x - 1] && grid[x - 1][y + 1]) {
+			ret.push(grid[x - 1][y + 1]);
+		}
+
+		// Northeast
+		if (grid[x + 1] && grid[x + 1][y + 1]) {
+			ret.push(grid[x + 1][y + 1]);
+		}
+	}
+
+	return ret;
+};
+
+Graph.prototype.toString = function() {
+	var graphString = [];
+	var nodes = this.grid;
+	for (var x = 0; x < nodes.length; x++) {
+		var rowDebug = [];
+		var row = nodes[x];
+		for (var y = 0; y < row.length; y++) {
+			rowDebug.push(row[y].weight);
+		}
+		graphString.push(rowDebug.join(" "));
+	}
+	return graphString.join("\n");
+};
 
 // 方格
 function GridNode(x,y,weight){
 	this.x = x;
 	this.y = y;
 	this.weight = weight;
-}
+};
 
 GridNode.prototype.toString = function() {
 	return "[" + this.x + " " + this.y + "]";
@@ -62,12 +246,15 @@ GridNode.prototype.toString = function() {
 
 //获取到从邻居结点到自己的权重
 GridNode.prototype.getCost = function(fromNeighbor) {
-
+	if(fromNeighbor && fromNeighbor.x != this.x && fromNeighbor.y != this.y) {
+		return this.weight * Math.sqrt(2);
+	}
+	return this.weight;
 }
 
 //返回该结点是否可以到达
 GridNode.prototype.isWall = function() {
-
+	return this.weight === 0;
 }
 
 // 数据结构（最小堆）
@@ -116,7 +303,7 @@ var BinaryHeap = {
 		}
 	},
 
-	// 
+	//重新排序
 	RescoreElement : function(element) {
 		this.SinkDown(this.content.indexOf(element));
 	},
@@ -193,9 +380,20 @@ var BinaryHeap = {
 
 // 游戏控制器
 var GameController = {
-	pathTo : function(grid) {
+	pathTo : function(node) {
+		var curr = node;
+		var path = [];
+		while(curr.parent){
+			path.unshift(curr);
+			curr = curr.parent;
+		}
+		return path;
+	},
 
-	}
-
+	getHeap : function() {
+		return new BinaryHeap(function(node) {
+			node.f;
+		});
+	},
 
 };
