@@ -8,7 +8,10 @@ var AStar = {
 		var heuristic = AStar.manhattan;
 		var closest = options.closest || false;
 
-		var openHeap = GameController.getHeap();
+		var openHeap =  new BinaryHeap(function(node) {
+			node.f;
+		});
+
 		var closetNode = start;
 		start.h = manhattan(start,end);
 
@@ -23,7 +26,7 @@ var AStar = {
 
 			//找到结果
 			if(currentNode === end)
-				return GameController.pathTo(currentNode);
+				return this.pathTo(currentNode);
 
 			//移动节点从开列表到闭列表
 			currentNode.closed = true;
@@ -378,22 +381,37 @@ var BinaryHeap = {
  
 };
 
-// 游戏控制器
-var GameController = {
-	pathTo : function(node) {
-		var curr = node;
-		var path = [];
-		while(curr.parent){
-			path.unshift(curr);
-			curr = curr.parent;
-		}
-		return path;
-	},
+//返回路径（通过父亲结点）
+function pathTo(node) {
+	var curr = node;
+	var path = [];
+	while(curr.parent){
+		path.unshift(curr);
+		curr = curr.parent;
+	}
+	return path;
+};
 
-	getHeap : function() {
-		return new BinaryHeap(function(node) {
-			node.f;
-		});
-	},
+
+// 游戏控制器
+function GameController(){
+
+	this.initlize();
+};
+
+GameController.prototype.initlize = function(){
+	this.grid = [];
+	var nodes = [];
+	this.start = null,this.end = null;
+	this.graph = new Graph(nodes,null);
 
 };
+
+GameController.prototype.startSearch = function(){
+	var path = AStar.SearchPath(this.graph,this.start,this.end,null);
+
+	return path;
+};
+
+var controller = new GameController();
+var path = controller.startSearch();
